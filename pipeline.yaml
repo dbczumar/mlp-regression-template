@@ -1,52 +1,57 @@
-data:
-  custom_loader_method: steps.ingest.load_file_as_dataframe
-  format: parquet
-  location: ./data/sample.parquet
-data_scoring:
-  custom_loader_method: steps.ingest.load_file_as_dataframe
-  format: parquet
-  location: ./data/sample.parquet
-  sql: SELECT * FROM delta.`./data/sample.parquet`
-experiment:
-  artifact_location: ./metadata/mlflow/mlartifacts
-  name: sklearn_regression_experiment
-  tracking_uri: sqlite:///metadata/mlflow/mlruns.db
+template: regression/v1
 steps:
-  evaluate:
-    metrics:
-      custom:
-      - function: steps.metrics.weighted_mean_squared_error
-        greater_is_better: false
-        name: weighted_mean_squared_error
-      primary: root_mean_squared_error
-    validation_criteria:
-    - metric: root_mean_squared_error
-      threshold: 100
-    - metric: mean_absolute_error
-      threshold: 500
-    - metric: weighted_mean_squared_error
-      threshold: 200
-  predict:
-    output_format: parquet
-    output_location: ./data/sample_output.parquet
-  register:
-    allow_non_validated_model: false
-    model_name: mymodel
+  ingest:
+    location: ./data/sample.parquet
+    use_cached: true
+    format: parquet
   split:
     split_ratios:
     - 0.1
     - 0.1
     - 0.8
-  train:
-    estimator_method: steps.train.estimator_fn
-    metrics:
-      custom:
-      - function: steps.metrics.weighted_mean_squared_error
-        greater_is_better: true
-        name: weighted_mean_squared_error
-      primary: root_mean_squared_error
+    target_col: fare_amount
+    post_split_method: steps.split.process_splits
   transform:
     transformer_method: steps.transform.transformer_fn
-  transformer_method: steps.transform.transformer_fn
-target_col: fare_amount
-template: regression/v1
+    target_col: fare_amount
+  train:
+    estimator_method: steps.train.estimator_fn
+    target_col: fare_amount
+    metrics:
+      custom:
+      - name: weighted_mean_squared_error
+        function: steps.metrics.weighted_mean_squared_error
+        greater_is_better: false
+      primary: root_mean_squared_error
+  evaluate:
+    target_col: fare_amount
+    metrics:
+      custom:
+      - name: weighted_mean_squared_error
+        function: steps.metrics.weighted_mean_squared_error
+        greater_is_better: false
+      primary: root_mean_squared_error
+    validation_criteria:
+    - metric: root_mean_squared_error
+      threshold: 100
+    - metric: mean_absolute_error
+      threshold: 600
+    - metric: weighted_mean_squared_error
+      threshold: 200
+  register:
+    allow_non_validated_model: false
+    model_name: mymodel
+  ingest_scoring:
+    custom_loader_method: steps.ingest.load_file_as_dataframe
+    format: parquet
+    location: ./data/sample.parquet
+    sql: SELECT * FROM delta.`./data/sample.parquet`
+  predict:
+    output_format: parquet
+    output_location: ./data/sample_output.parquet
+experiment:
+  name: sklearn_regression_experiment
+  artifact_location: /Users/corey.zumar/mlflow/examples/pipelines/sklearn_regression/metadata/mlflow/mlartifacts
+  tracking_uri: sqlite:////Users/corey.zumar/mlflow/examples/pipelines/sklearn_regression/metadata/mlflow/mlruns3.db
+model_registry:
+  uri: sqlite:////Users/corey.zumar/mlflow/examples/pipelines/sklearn_regression/metadata/mlflow/mlruns3.db

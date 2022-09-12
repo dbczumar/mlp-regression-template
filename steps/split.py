@@ -1,3 +1,4 @@
+
 """
 This module defines the following routines used by the 'split' step of the regression pipeline:
 
@@ -7,7 +8,10 @@ This module defines the following routines used by the 'split' step of the regre
 
 from pandas import DataFrame
 
+from mlflow.pipelines.decorators import mlp
 
+
+@mlp
 def process_splits(
     train_df: DataFrame, validation_df: DataFrame, test_df: DataFrame
 ) -> (DataFrame, DataFrame, DataFrame):
