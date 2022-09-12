@@ -1,3 +1,4 @@
+
 """
 This module defines the following routines used by the 'ingest' step of the regression pipeline:
 
@@ -6,12 +7,14 @@ This module defines the following routines used by the 'ingest' step of the regr
 """
 
 import logging
-
 from pandas import DataFrame
+
+from mlflow.pipelines import mlp
 
 _logger = logging.getLogger(__name__)
 
 
+@mlp
 def load_file_as_dataframe(file_path: str, file_format: str) -> DataFrame:
     """
     Load content from the specified dataset file as a Pandas DataFrame.
@@ -25,7 +28,9 @@ def load_file_as_dataframe(file_path: str, file_format: str) -> DataFrame:
     :param file_format: The file format string, such as "csv".
     :return: A Pandas DataFrame representing the content of the specified file.
     """
-
+    if file_format == "baz":
+        import pandas
+        return pandas.read_parquet(file_path)
     if file_format == "csv":
         import pandas
 

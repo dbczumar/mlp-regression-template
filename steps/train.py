@@ -1,3 +1,4 @@
+
 """
 This module defines the following routines used by the 'train' step of the regression pipeline:
 
@@ -5,7 +6,10 @@ This module defines the following routines used by the 'train' step of the regre
   during training to produce a model pipeline.
 """
 
+from mlflow.pipelines.decorators import mlp
 
+
+@mlp
 def estimator_fn():
     """
     Returns an *unfitted* estimator that defines ``fit()`` and ``predict()`` methods.
@@ -14,4 +18,4 @@ def estimator_fn():
     """
     from sklearn.linear_model import SGDRegressor
 
-    return SGDRegressor(random_state=42)
+    return SGDRegressor(random_state=43)
